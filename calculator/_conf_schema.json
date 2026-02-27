@@ -1,0 +1,8 @@
+{
+  "qalculate_bin": {
+    "description": "Qalculate安装位置",
+    "type": "string",
+    "hint": "Qalculate安装位置。若为空则看作未安装。",
+    "default": ""
+  }
+}
