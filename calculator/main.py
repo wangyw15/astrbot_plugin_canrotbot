@@ -1,10 +1,11 @@
 import re
 
-from astrbot.api import logger, AstrBotConfig
+from astrbot.api import AstrBotConfig, logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
 
 from .qalculate import Qalculate
+
 
 class QalculatePlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
