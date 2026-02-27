@@ -1,0 +1,87 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/style.css" />
+    <style>
+        body {
+            font-family: "LXGW WenKai Screen", sans-serif;
+            margin: 7px;
+            background-image: url("{{ background }}");
+            width: 520px;
+            height: 820px;
+        }
+        .container {
+            display: grid;
+            width: 500px;
+            height: 800px;
+            grid-template-rows: repeat(5, 1fr);
+            grid-template-columns: 1.3fr repeat(4, 1fr);
+            border: solid #96514d;
+        }
+        .container>div {
+            border: solid #96514d;
+            padding: 5px;
+        }
+        .container .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .container .title {
+            grid-row: 1 / 2;
+            grid-column: 1 / 6;
+            font-size: 30px;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .container .title div {
+            width: 100%;
+        }
+        .container .content {
+            writing-mode: vertical-rl;
+            grid-row: 2 / 4;
+            font-size: 45px;
+        }
+        .container .straight {
+            writing-mode: vertical-rl;
+            grid-column: 2 / 6;
+            grid-row: 4 / 6;
+            font-size: 19px;
+            line-height: 28px;
+            text-decoration: underline #96514d;
+        }
+        .container .mean {
+            grid-row: 2 / 6;
+            grid-column: 1 / 1;
+            font-size: 17px;
+        }
+        .mean span {
+            text-decoration: underline #96514d;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="container">
+    <div class="title center">
+        <div>日本东京浅草寺观音灵签{{ kuji.count }}</div>
+        <div>{{ kuji.type }}</div>
+    </div>
+
+    {%- for line in kuji.content -%}
+    <div class="content center" style="grid-column: {{ 5 - loop.index0 }};">
+        {{ line }}
+    </div>
+    {%- endfor -%}
+
+    <div class="straight">
+        {{ kuji.straight }}
+    </div>
+
+    <div class="mean">
+    {%- for m in kuji.mean-%}
+        <p>{{ m.split('：')[0] }}：<br /><span>{{ m.split('：')[1] }}</span></p>
+    {%- endfor -%}
+    </div>
+</div>
+</body>
+</html>

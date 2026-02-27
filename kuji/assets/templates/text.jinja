@@ -1,0 +1,9 @@
+日本东京浅草寺观音灵签{{ kuji.count }} {{ kuji.type }}
+    {{ kuji.content[0] }}，{{ kuji.content[1] }}，
+    {{ kuji.content[2] }}，{{ kuji.content[3] }}。
+〖四句解说〗
+    {{ kuji.straight }}
+〖解曰〗
+{% for i in kuji.mean %}
+    ❃ {{ i }}
+{% endfor %}
