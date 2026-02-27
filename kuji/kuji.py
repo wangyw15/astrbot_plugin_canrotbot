@@ -32,7 +32,13 @@ class Kuji:
             (self.asset_path / "templates" / "html.jinja").read_text(encoding="utf-8"),
             {"kuji": kuji, "background": "data:image/png;base64," + background},
             options={
-                "image_type": image_type,
+                "type": image_type,
+                "clip": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 520,
+                    "height": 820,
+                },
             },
         )
 

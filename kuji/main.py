@@ -20,8 +20,6 @@ class KujiPlugin(Star):
     async def kuji_command(self, event: AstrMessageEvent):
         """从日本浅草寺的签文中获取一个随机的御神签"""
         kuji = self.kuji.get_kuji()
-        # TODO: 本地的HTML渲染
-        # return event.image_result(
-        #     await self.kuji.generate_image(self.html_render, kuji)
-        # )
-        return event.plain_result(self.kuji.generate_text(kuji))
+        return event.image_result(
+            await self.kuji.generate_image(self.html_render, kuji)
+        )
