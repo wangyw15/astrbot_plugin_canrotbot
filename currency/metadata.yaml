@@ -1,0 +1,5 @@
+name: currency
+display_name: 汇率转换
+desc: 数据来源于中国工商银行
+version: v1.0.0
+author: wangyw15
