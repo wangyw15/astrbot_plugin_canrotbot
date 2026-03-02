@@ -52,3 +52,22 @@ class SigninPlugin(Star):
         self.history.add_record(uid, title, content, theme_instance.name)
         await self.history.set_latest_image_url(uid, image)
         return event.image_result(image)
+
+    @filter.llm_tool("signin_get_today_record")
+    async def get_today_record_tool(self, event: AstrMessageEvent):
+        """获取用户当前的签到运势内容。若当天没有签到过，则返回未签到"""
+        if today_record := self.history.get_today_record(event.get_sender_id()):
+            return today_record["title"] + "\n" + today_record["content"]
+        return "用户今天还未签到过"
+
+    @filter.llm_tool("signin")
+    async def signin_tool(self, event: AstrMessageEvent):
+        """
+        每日签到
+
+        每天第一次签到会提供新的运势，当天多次签到只会返回第一次签到的结果
+        """
+        yield await self.signin_command(event)
+
+        if today_record := self.history.get_today_record(event.get_sender_id()):
+            yield today_record["title"] + "\n" + today_record["content"]
