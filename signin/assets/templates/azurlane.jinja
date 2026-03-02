@@ -1,0 +1,54 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>{{ main_style }}</style>
+    <style>
+        #main {
+            background-size: cover;
+        }
+
+        .main-border {
+            border-width: 0.3rem;
+        }
+
+        .fortune-container {
+            --container-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(255, 255, 255, 0.5);
+            left: 3%;
+            top: 3%;
+            width: 25%;
+        }
+
+        .title-container {
+            font-size: calc(0.06 * var(--size));
+        }
+
+        .content-container {
+            font-size: calc(0.04 * var(--size));
+        }
+
+        .logo {
+            width: 30%;
+            top: 85%;
+            left: 69%;
+        }
+    </style>
+</head>
+<body>
+<div id="main">
+    <img class="background-image" src="{{ image }}"/>
+    <div class="main-border"></div>
+    <img class="logo" src="https://i0.hdslb.com/bfs/game-static/78121985618402c4137b041e294d5055ea897a42.png"/>
+    <div class="fortune-container">
+        <div class="fortune-inner-box">
+            <div class="title-container">
+                {{ title }}
+            </div>
+            <div class="content-container">
+                {{ content }}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

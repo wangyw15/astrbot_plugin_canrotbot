@@ -1,0 +1,50 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>{{ main_style }}</style>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #main {
+            background-color: transparent;
+        }
+
+        .title {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            left: 12%;
+            top: 13.5%;
+            width: 33%;
+            color: #F5F5F5;
+            font-family: 'Mamelon', sans-serif;
+            font-size: calc(0.095 * var(--size));
+        }
+
+        .content {
+            display: flex;
+            align-items: center;
+            position: relative;
+            left: 12%;
+            top: 21%;
+            height: 55%;
+            width: 33.5%;
+            color: #323232;
+            font-family: 'sakura', sans-serif;
+            font-size: calc(0.05 * var(--size));
+            writing-mode: vertical-rl;
+        }
+    </style>
+</head>
+<body>
+<div id="main" :style="main">
+    <img class="background-image" src="{{ image }}"/>
+    <div class="title">{{ title }}</div>
+    <div class="content">{{ content }}</div>
+</div>
+</body>
+</html>
