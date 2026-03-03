@@ -1,0 +1,10 @@
+现在的正在进行的展览有:
+
+{% for project in data %}
+{{ project.project_name }}
+开始时间: {{ project.start_time }}
+结束时间: {{ project.end_time }}
+{% if with_url %}
+链接: https://show.bilibili.com/platform/detail.html?id={{ project.id }}
+{% endif %}
+{% endfor %}
