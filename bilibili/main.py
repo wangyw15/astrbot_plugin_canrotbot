@@ -37,6 +37,7 @@ class BilibiliPlugin(Star):
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def project_command(self, event: AstrMessageEvent):
+        """列出B站会员购获取的上海地区活动。输入“我要看展”即可触发。"""
         if event.message_str != "我要看展":
             return
 
