@@ -1,0 +1,5 @@
+name: youtube
+display_name: YouTube
+desc: 获取 YouTube 链接指向的内容
+version: v1.0.0
+author: wangyw15

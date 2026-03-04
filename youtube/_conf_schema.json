@@ -1,0 +1,8 @@
+{
+  "api_key": {
+    "description": "Google Cloud API Key",
+    "type": "string",
+    "hint": "Google Cloud API Key，用于调用YouTube API获取视频信息",
+    "default": ""
+  }
+}

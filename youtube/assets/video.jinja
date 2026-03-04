@@ -1,0 +1,20 @@
+标题:
+{{ data.snippet.title }}
+频道:
+{{ data.snippet.channelTitle }}
+发布时间: {{ data.snippet.published_at }}
+播放: {{ data.statistics.viewCount }}
+{%- if 'likeCount' in data.statistics %}
+点赞: {{ data.statistics.likeCount }}
+{%- endif -%}
+{%- if 'commentCount' in data.statistics %}
+评论: {{ data.statistics.commentCount }}
+{%- endif %}
+简介:
+{{ clean_description(data.snippet.description) }}
+视频链接:
+{% if '#shorts' in data.snippet.title %}
+https://youtube.com/shorts/{{ data.id }}
+{%- else %}
+https://youtu.be/{{ data.id }}
+{%- endif -%}
