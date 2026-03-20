@@ -1,0 +1,5 @@
+name: random
+display_name: 随机选择
+desc: 多个选项里随机选一个，支持设置权重
+version: v1.0.0
+author: wangyw15
