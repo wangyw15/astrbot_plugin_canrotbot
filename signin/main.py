@@ -21,13 +21,13 @@ class SigninPlugin(Star):
         uid = event.get_sender_id()
         if self.history.already_signin(uid):
             image_path = self.history.get_latest_image_path(uid)
-            if image_path.exists():
+            if image_path is not None and image_path.exists():
                 return event.image_result(str(image_path))
             else:
-                today_record = self.history.get_today_record(uid)
-                title = today_record["title"]
-                content = today_record["content"]
-                theme = today_record["theme"]
+                if today_record := self.history.get_today_record(uid):
+                    title = today_record["title"]
+                    content = today_record["content"]
+                    theme = today_record["theme"]
         else:
             title, content = self.fortune()
 
