@@ -1,0 +1,41 @@
+{%- if body.json -%}
+{%- for game in body -%}
+## 🎮 {{ game.title }}
+
+| 类型 | 价格 | 货币 |
+|------|------|------|
+| 💰 当前价格 | {{ game.lastPrice.amount }} | {{ game.lastPrice.currency }} |
+| 📉 历史最低 | {{ game.historyLow.amount }} | {{ game.historyLow.currency }} |
+
+{%- if game.deals | selectattr('cut', '!=', 0) | list | length > 0 -%}
+
+**💎 可用优惠** 🛒
+
+{%- for deal in game.deals -%}
+{%- if deal.cut != 0 -%}
+
+---
+
+**🏪 {{ deal.shop.name }}**
+
+| 项目 | 详情 |
+|------|------|
+| 原价 | {{ deal.regular.amount }} {{ deal.regular.currency }} |
+| 现价 | {{ deal.price.amount }} {{ deal.price.currency }} |
+| 折扣 | 🎯 **{{ deal.cut }}%** |
+| 商店史低 | {{ deal.storeLow.amount }} {{ deal.storeLow.currency }} |
+{%- if with_url -%}
+| 购买链接 | [🔗 点击购买]({{ deal.url }}) |
+{%- endif -%}
+
+{%- endif -%}
+{%- endfor -%}
+
+{%- endif -%}
+
+---
+
+{% endfor -%}
+{%- elif body.text and body.text == "ping" -%}
+pong
+{%- endif -%}

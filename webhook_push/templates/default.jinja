@@ -1,0 +1,17 @@
+# Headers
+
+```json
+{{ headers | tojson(indent=2) }}
+```
+
+# Body
+
+```json
+{% if body.form -%}
+{{ body.form | tojson }}
+{%- elif body.form -%}
+{{ body.json }}
+{%- else -%}
+{{ body.text }}
+{%- endif %}
+```
