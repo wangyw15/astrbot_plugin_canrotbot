@@ -1,4 +1,4 @@
-{%- if body.text == "ping" -%}
+{%- if headers["Itad-Hook-Event"] == "ping" -%}
 pong
 {%- elif body.json -%}
 {%- for game in body -%}
