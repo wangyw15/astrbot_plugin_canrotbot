@@ -1,0 +1,14 @@
+签到结果
+{%- for result in results %}
+
+{{ result.name }}
+共关注 {{ result.forums | length }} 个吧
+签到成功: {{ result.success | length }} 个
+签到失败: {{ result.fail | length }} 个
+{% if result.fail %}
+签到失败的吧：{% for name in result.fail %}{{ name }} {% endfor %}
+{%- endif %}
+
+---
+
+{%- endfor -%}
