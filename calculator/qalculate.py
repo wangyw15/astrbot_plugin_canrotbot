@@ -22,5 +22,5 @@ class Qalculate:
         try:
             self.get_version()
             return True
-        except:
+        except:  # noqa
             return False
