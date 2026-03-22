@@ -76,13 +76,29 @@ class WebhookPushAdapter(Platform):
         template_name = request.args.get("template", "default")
         template: Template = Template(self.manager.get_template(template_name) or "")
 
+        # IsThereAnyDeal的ping会发送类型application/json的纯文本ping内容
+        # https://docs.isthereanydeal.com/#tag/Webhooks/operation/webhook-ping-post
+        # 避免获取内容报错
+        try:
+            form_data = await request.form
+        except:  # noqa
+            form_data = ""
+        try:
+            json_data = await request.json
+        except:  # noqa
+            json_data = ""
+        try:
+            text_data = await request.get_data(as_text=True)
+        except:  # noqa
+            text_data = ""
+
         content = template.render(
             args=request.args,
             headers=dict(request.headers.items()),
             body={
-                "form": await request.form,
-                "json": await request.json,
-                "text": await request.get_data(as_text=True),
+                "form": form_data,
+                "json": json_data,
+                "text": text_data,
             },
             with_url=True,  # [TODO] 根据平台判断是否能够发送链接
         )

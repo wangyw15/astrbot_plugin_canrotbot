@@ -1,4 +1,6 @@
-{%- if body.json -%}
+{%- if body.text == "ping" -%}
+pong
+{%- elif body.json -%}
 {%- for game in body -%}
 ## 🎮 {{ game.title }}
 
@@ -36,6 +38,4 @@
 ---
 
 {% endfor -%}
-{%- elif body.text and body.text == "ping" -%}
-pong
 {%- endif -%}
