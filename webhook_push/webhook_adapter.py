@@ -54,6 +54,7 @@ class WebhookPushAdapter(Platform):
             description="Webhook 推送消息提醒",
             id=cast(str, self.config.get("id")),
             support_streaming_message=False,
+            support_proactive_message=False,
         )
 
     async def run(self) -> None:
