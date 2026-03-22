@@ -1,4 +1,4 @@
-{%- if body is string -%}
+{%- if body.text == "ping" -%}
 pong
 {%- else -%}
 {%- for game in body -%}
