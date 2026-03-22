@@ -1,0 +1,8 @@
+{
+  "webhook_push_url": {
+    "description": "Webhook 推送回调地址",
+    "type": "string",
+    "hint": "Webhook 推送的基础回调地址，用于自动生成回调链接，不填不影响使用。",
+    "default": ""
+  }
+}
