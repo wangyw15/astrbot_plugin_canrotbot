@@ -1,7 +1,7 @@
 {%- if headers["Itad-Hook-Event"] == "ping" -%}
 pong
 {%- elif body.json -%}
-{%- for game in body -%}
+{%- for game in body.json -%}
 ## 🎮 {{ game.title }}
 
 | 类型 | 价格 | 货币 |
