@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 from typing import Any, cast
 
 from jinja2 import Template
@@ -17,7 +18,7 @@ from .webhook_manager import WebhookPushManager
     adapter_name="webhook_push",
     desc="Webhook 推送消息提醒",
     adapter_display_name="Webhook 推送",
-    logo_path="icon.png",
+    logo_path=str(Path(__file__).parent.resolve() / "icon.png"),
     support_streaming_message=False,
     default_config_tmpl={
         "enable": False,
