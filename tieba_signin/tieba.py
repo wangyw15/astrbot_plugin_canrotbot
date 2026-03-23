@@ -12,7 +12,7 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 
 class BaiduAccount(TypedDict):
-    owner: str
+    umo: str
     name: str
     bduss: str
     stoken: str
@@ -37,7 +37,7 @@ class ForumResult(TypedDict):
 
 
 class SigninResult(TypedDict):
-    owner: str
+    umo: str
     name: str
     time: str
     forums: list[ForumResult]
@@ -60,18 +60,18 @@ class AccountManager:
         if not self.account_file.exists():
             self.account_file.touch()
 
-    def add_account(self, owner: str, name: str, bduss: str, stoken: str) -> None:
+    def add_account(self, umo: str, name: str, bduss: str, stoken: str) -> None:
         """
         添加百度账号
 
         Args:
             name: 账号名称
-            owner: 用户ID
+            umo: UMO
             bduss: BDUSS
             stoken: STOKEN
         """
         account: BaiduAccount = {
-            "owner": owner,
+            "umo": umo,
             "name": name,
             "bduss": bduss,
             "stoken": stoken,
@@ -79,12 +79,12 @@ class AccountManager:
         with self.account_file.open("a", encoding="utf-8") as f:
             f.write(json.dumps(account, ensure_ascii=False) + "\n")
 
-    def delete_account(self, owner: str, name: str) -> bool:
+    def delete_account(self, umo: str, name: str) -> bool:
         """
         删除百度账号
 
         Args:
-            owner: 用户ID
+            umo: UMO
             name: 账号名称
 
         Return:
@@ -96,7 +96,7 @@ class AccountManager:
         delete_index = -1
         for i, line in enumerate(account_lines):
             account: BaiduAccount = json.loads(line)
-            if account["owner"] == owner and account["name"] == name:
+            if account["umo"] == umo and account["name"] == name:
                 delete_index = i
                 break
 
@@ -110,12 +110,12 @@ class AccountManager:
                 f.write(line + "\n")
         return True
 
-    def delete_all_accounts(self, owner: str) -> None:
+    def delete_all_accounts(self, umo: str) -> None:
         """
         删除所有百度账号
 
         Args:
-            owner: 用户ID
+            umo: UMO
         """
         with self.account_file.open("r", encoding="utf-8") as f:
             account_lines = f.readlines()
@@ -123,7 +123,7 @@ class AccountManager:
         delete_indexes: list[int] = []
         for i, line in enumerate(account_lines):
             account: BaiduAccount = json.loads(line)
-            if account["owner"] == owner:
+            if account["umo"] == umo:
                 delete_indexes.append(i)
 
         if not delete_indexes:
@@ -137,12 +137,12 @@ class AccountManager:
             for line in account_lines:
                 f.write(line + "\n")
 
-    def get_account(self, owner: str, name: str) -> BaiduAccount | None:
+    def get_account(self, umo: str, name: str) -> BaiduAccount | None:
         """
         获取百度账号
 
         Args:
-            owner: 用户ID
+            umo: UMO
             name: 账号名称
 
         Return:
@@ -151,7 +151,7 @@ class AccountManager:
         with self.account_file.open("r", encoding="utf-8") as f:
             while line := f.readline():
                 account: BaiduAccount = json.loads(line)
-                if account["owner"] == owner and account["name"] == name:
+                if account["umo"] == umo and account["name"] == name:
                     return account
 
         return None
@@ -171,12 +171,12 @@ class AccountManager:
 
         return accounts
 
-    def get_all_owned_accounts(self, owner: str) -> list[BaiduAccount]:
+    def get_all_owned_accounts(self, umo: str) -> list[BaiduAccount]:
         """
         获取所有百度账号
 
         Args:
-            owner: 用户ID
+            umo: UMO
 
         Return:
             百度账号
@@ -185,7 +185,7 @@ class AccountManager:
         with self.account_file.open("r", encoding="utf-8") as f:
             while line := f.readline():
                 account: BaiduAccount = json.loads(line)
-                if account["owner"] == owner:
+                if account["umo"] == umo:
                     accounts.append(account)
 
         return accounts
@@ -206,18 +206,18 @@ class ResultManager:
         self.plain_template = self.plugin_path / "templates" / "plain.jinja"
 
     def save_signin_result(
-        self, owner: str, name: str, forum_results: list[ForumResult]
+        self, umo: str, name: str, forum_results: list[ForumResult]
     ) -> None:
         """
         保存签到结果
 
         Args:
-            owner: 用户ID
+            umo: UMO
             name: 账号名称
             result: 签到结果
         """
         data: SigninResult = {
-            "owner": owner,
+            "umo": umo,
             "name": name,
             "time": datetime.now().isoformat(),
             "forums": forum_results,
@@ -225,12 +225,12 @@ class ResultManager:
         with self.result_file.open("a", encoding="utf-8") as f:
             f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
-    def get_today_result(self, owner: str, name: str = "") -> list[SigninResult]:
+    def get_today_result(self, umo: str, name: str = "") -> list[SigninResult]:
         """
         获取给定用户今日所有签到结果
 
         Args:
-            owner: 用户ID
+            umo: UMO
             name: 账号名称，不传入则默认获取所有账户的内容
 
         Returns:
@@ -241,7 +241,7 @@ class ResultManager:
             while line := f.readline():
                 data: SigninResult = json.loads(line)
                 if (
-                    data["owner"] == owner
+                    data["umo"] == umo
                     and datetime.fromisoformat(data["time"]).date()
                     == datetime.now().date()
                 ):
@@ -262,9 +262,9 @@ class ResultManager:
             while line := f.readline():
                 data: SigninResult = json.loads(line)
                 if datetime.fromisoformat(data["time"]).date() == datetime.now().date():
-                    if data["owner"] not in result:
-                        result[data["owner"]] = []
-                    result[data["owner"]].append(data)
+                    if data["umo"] not in result:
+                        result[data["umo"]] = []
+                    result[data["umo"]].append(data)
 
         return result
 
@@ -385,6 +385,4 @@ class TiebaSignin:
                     }
                 )
 
-        self.result_manager.save_signin_result(
-            account["owner"], account["name"], result
-        )
+        self.result_manager.save_signin_result(account["umo"], account["name"], result)
