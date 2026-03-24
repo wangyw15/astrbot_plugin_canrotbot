@@ -1,0 +1,16 @@
+{%- set entry_count = entries|count -%}
+{%- if max_display == -1 -%}
+{%- set max_display = entry_count -%}
+{%- endif -%}
+{%- if entry_count == 0 -%}
+📭 暂无新内容
+{%- else -%}
+📰 {{ name }} 的最新更新（共 {{ entry_count }} 条）
+
+{%- for i in range(max_display) if i < entry_count %}{% set entry = entries[i] %}
+{{ loop.index }}. {{ entry.title }}
+   🔗 {{ entry.link }}
+   🕐 {{ entry.published.isoformat()[:19] }}
+{% endfor %}
+{% if entry_count > max_display %}... 还有 {{ entry_count - max_display }} 条更新未显示{% endif %}
+{%- endif -%}
