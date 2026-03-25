@@ -1,6 +1,4 @@
-import ipaddress
 import json
-import socket
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TypedDict
@@ -99,7 +97,9 @@ class Rss:
                 last_updated = cache["last_updated"]
 
         try:
-            response = await self.client.get(url, headers=headers)
+            response = await self.client.get(
+                url, headers=headers, follow_redirects=True
+            )
 
             # 304 Not Modified - 内容未更新
             if response.status_code == 304:
