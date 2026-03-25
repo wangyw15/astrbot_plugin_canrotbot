@@ -16,12 +16,21 @@ class BilibiliPlugin(Star):
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def bilibili_link(self, event: AstrMessageEvent):
-        """监听b站完整链接，例如https://www.bilibili.com/video/BV14iZ3YcEZw/"""
-        match = re.match(self.bilibili.vid_pattern, event.message_str)
-        if match is None:
+        """监听b站完整链接和短链接，例如https://www.bilibili.com/video/BV14iZ3YcEZw/ 或 https://b23.tv/xxxxxxx"""
+        vid = None
+
+        # 匹配短链接
+        if short_match := re.match(self.bilibili.short_link_pattern, event.message_str):
+            vid = await self.bilibili.get_bvid_from_short_link(short_match[0])
+        else:
+            # 匹配完整链接
+            if full_match := re.match(self.bilibili.vid_pattern, event.message_str):
+                vid = full_match[1]
+
+        if vid is None:
             return
 
-        data = await self.bilibili.fetch_video_data(match[1])
+        data = await self.bilibili.fetch_video_data(vid)
         if data is None:
             return
         return event.chain_result(
