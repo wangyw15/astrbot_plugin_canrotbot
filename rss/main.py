@@ -1,5 +1,6 @@
 import json
 
+from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.star import Context, Star
 from astrbot.core.db import CronJob
@@ -126,15 +127,27 @@ class RssPlugin(Star):
 
     def get_update_job_handler(self, subscription: RssSubscription):
         async def _update_handler():
+            logger.info(
+                f"开始检查RSS订阅 '{subscription['name']}' (umo: {subscription['umo']}) 的更新"
+            )
             entries = await self.rss.update_rss(
                 subscription["umo"], subscription["url"]
             )
             if not entries:
+                logger.info(
+                    f"RSS订阅 '{subscription['name']}' (umo: {subscription['umo']}) 没有更新"
+                )
                 return
 
+            logger.info(
+                f"RSS订阅 '{subscription['name']}' (umo: {subscription['umo']}) 发现 {len(entries)} 条新更新"
+            )
             msg = self.rss.generate_update_result(subscription["name"], entries, 10)
             await self.context.send_message(
                 subscription["umo"], MessageChain().message(msg)
+            )
+            logger.info(
+                f"已发送RSS订阅 '{subscription['name']}' (umo: {subscription['umo']}) 的更新消息"
             )
 
         return _update_handler
