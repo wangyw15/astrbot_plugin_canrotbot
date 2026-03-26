@@ -2,7 +2,6 @@ import asyncio
 from pathlib import Path
 from typing import Any, cast
 
-from jinja2 import Template
 from quart import Request
 
 from astrbot.api import logger
@@ -75,7 +74,13 @@ class WebhookPushAdapter(Platform):
             return {"code": 1, "message": "Webhook push token not found"}, 401
 
         template_name = request.args.get("template", "default")
-        template: Template = Template(self.manager.get_template(template_name) or "")
+        template = self.manager.get_template(template_name)
+
+        if template is None:
+            await send_message(
+                umo, MessageChain().message(f"Webhook推送模板 {template_name} 未找到")
+            )
+            return
 
         # IsThereAnyDeal的ping会发送类型application/json的纯文本ping内容
         # https://docs.isthereanydeal.com/#tag/Webhooks/operation/webhook-ping-post

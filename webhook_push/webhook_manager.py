@@ -3,6 +3,8 @@ import uuid
 from pathlib import Path
 from typing import TypedDict
 
+from jinja2 import Environment, FileSystemLoader, Template, TemplateNotFound
+
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 
@@ -23,6 +25,13 @@ class WebhookPushManager:
 
         self.builtin_template_path = Path(__file__).parent / "templates"
         self.user_template_path = self.data_path / "templates"
+
+        # 初始化 Jinja2 环境，优先查找用户模板，然后是内置模板
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(
+                [self.user_template_path, self.builtin_template_path]
+            )
+        )
 
     def get_token(self, umo: str) -> str:
         with self.history_file.open("r", encoding="utf-8") as f:
@@ -49,7 +58,9 @@ class WebhookPushManager:
 
         return None
 
-    def get_template(self, name: str = "default", fallback: bool = True) -> str | None:
+    def get_template(
+        self, name: str = "default", fallback: bool = True
+    ) -> Template | None:
         """
         获取模板内容
 
@@ -57,15 +68,10 @@ class WebhookPushManager:
             name: 模板文件名
             fallback: 未找到对应模板时是否返回默认模板
         """
-        template = self.user_template_path / f"{name}.jinja"
-        if template.exists() and template.is_file():
-            return template.read_text("utf-8")
-
-        template = self.builtin_template_path / f"{name}.jinja"
-        if template.exists() and template.is_file():
-            return template.read_text("utf-8")
-
-        if fallback:
-            return (self.builtin_template_path / "default.jinja").read_text("utf-8")
-
-        return None
+        template_name = f"{name}.jinja"
+        try:
+            return self.jinja_env.get_template(template_name)
+        except TemplateNotFound:
+            if fallback:
+                return self.jinja_env.get_template("default.jinja")
+            return None
