@@ -3,6 +3,7 @@ import json
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.star import Context, Star
+from astrbot.core import astrbot_config
 from astrbot.core.db import CronJob
 from astrbot.core.star.filter.command import GreedyStr
 
@@ -13,7 +14,7 @@ class RssPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
         self.context = context
-        self.rss = Rss()
+        self.rss = Rss(self.name, astrbot_config.get("http_proxy", ""))
         self.update_jobs: list[CronJob] = []
 
     async def initialize(self):
