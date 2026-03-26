@@ -21,9 +21,8 @@ class RssPlugin(Star):
             await self.add_update_job(subscription)
 
     async def terminate(self):
-        while self.update_jobs:
-            job = self.update_jobs.pop()
-            await self.context.cron_manager.delete_job(job.job_id)
+        for sub in self.rss.list_all_subscriptions():
+            await self.delete_update_job(sub)
 
     @filter.command_group("rss")
     async def rss_command_group():
