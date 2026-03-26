@@ -1,0 +1,13 @@
+标题: {{ data.title.native }}
+共 {{ data.episodes }} 集
+状态: 
+{%- if data.status == "FINISHED" %}完结
+{%- elif data.status == "RELEASING" %}更新中
+{%- elif data.status == "NOT_YET_RELEASED" %}待放送
+{%- else %}未知{% endif %}
+时间: {{ data.seasonYear }}年
+{%- if data.season == "SPRING" %}春季
+{%- elif data.season == "SUMMER" %}夏季
+{%- elif data.season == "FALL" %}
+秋季{%- elif data.season == "WINTER" %}冬季{% endif %}
+标签: {% for tag in data.tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}

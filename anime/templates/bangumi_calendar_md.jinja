@@ -1,0 +1,7 @@
+{%- for day in data -%}
+**{{ day.weekday.cn }}**
+{%- for item in day["items"] %}
+- {{ item.name_cn or item.name }}
+{% endfor %}
+
+{% endfor %}
