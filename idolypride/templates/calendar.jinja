@@ -1,0 +1,11 @@
+偶像荣耀当前活动:
+
+{% for event in events %}--- {{ event.name }} ---
+开始时间: {{ event.start.strftime('%Y-%m-%d') }}
+结束时间: {{ event.end.strftime('%Y-%m-%d') }}
+类型: {{ event.type }}
+{%- if event.page %}
+链接: https://wiki.biligame.com/idolypride/{{ event.page | urlencode }}
+{%- endif %}
+
+{% endfor %}
