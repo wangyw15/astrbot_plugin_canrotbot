@@ -19,7 +19,7 @@ class YouTubePlugin(Star):
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def youtube_link(self, event: AstrMessageEvent):
         """监听YouTube视频链接"""
-        match = re.match(self.youtube.LINK_PATTERN, event.message_str)
+        match = re.search(self.youtube.LINK_PATTERN, event.message_str)
         if match is None:
             return
 
