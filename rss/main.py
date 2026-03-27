@@ -18,12 +18,11 @@ class RssPlugin(Star):
         self.update_jobs: list[CronJob] = []
 
     async def initialize(self):
+        all_job_names = [i.name for i in await self.context.cron_manager.list_jobs()]
         for subscription in self.rss.list_all_subscriptions():
+            if self._generate_job_name(subscription) in all_job_names:
+                continue
             await self.add_update_job(subscription)
-
-    async def terminate(self):
-        for sub in self.rss.list_all_subscriptions():
-            await self.delete_update_job(sub)
 
     @filter.command_group("rss")
     async def rss_command_group():
@@ -109,13 +108,16 @@ class RssPlugin(Star):
         result_text = self.rss.generate_update_result(name, entries, max_display)
         yield event.plain_result(result_text)
 
+    def _generate_job_name(self, subscription: RssSubscription) -> str:
+        return f"rss_{subscription['umo']}_{subscription['name']}"
+
     async def add_update_job(self, subscription: RssSubscription):
         if subscription["cron"] is None:
             return
 
         self.update_jobs.append(
             await self.context.cron_manager.add_basic_job(
-                name=f"rss_{subscription['umo']}_{subscription['name']}",
+                name=self._generate_job_name(subscription),
                 cron_expression=subscription["cron"],
                 handler=self.get_update_job_handler(subscription),
                 description=f"RSS 自动更新 {subscription['umo']} {subscription['name']}",
@@ -149,7 +151,7 @@ class RssPlugin(Star):
         return _update_handler
 
     async def delete_update_job(self, subscription: RssSubscription) -> bool:
-        job_name = f"rss_{subscription['umo']}_{subscription['name']}"
+        job_name = self._generate_job_name(subscription)
         update_job: CronJob | None = None
 
         for job in self.update_jobs:
