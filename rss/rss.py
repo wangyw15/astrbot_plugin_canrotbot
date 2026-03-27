@@ -9,6 +9,7 @@ from httpx import AsyncClient
 from jinja2 import Template
 
 from astrbot.api import logger
+from astrbot.api.star import Star
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 
@@ -22,7 +23,7 @@ class RssSubscription(TypedDict):
 class RssUpdateInfo(TypedDict):
     etag: str
     last_modified: str
-    last_updated: datetime
+    last_updated: str
 
 
 class RssItem(TypedDict):
@@ -46,15 +47,20 @@ class Rss:
         _cache_headers: URL对应的ETag和Last-Modified缓存。
     """
 
-    def __init__(self, plugin_name: str = "rss", proxy: str = "") -> None:
+    def __init__(self, plugin: Star, proxy: str = "") -> None:
         """初始化RSS订阅管理器。
 
         Args:
             plugin_name: 插件名称，用于构建数据存储路径。
             proxy: HTTP代理地址，为空字符串时不使用代理。
         """
+        self.plugin = plugin
+        self.client = AsyncClient(proxy=proxy or None)
+
         self.plugin_path = Path(__file__).parent
-        self.data_path = Path(get_astrbot_data_path()) / "plugin_data" / plugin_name
+        self.data_path = (
+            Path(get_astrbot_data_path()) / "plugin_data" / self.plugin.name
+        )
         if not self.data_path.exists():
             self.data_path.mkdir(parents=True)
 
@@ -63,12 +69,28 @@ class Rss:
             self.subscription_file.touch()
         self.template_file = self.plugin_path / "template.jinja"
 
-        self.client = AsyncClient(proxy=proxy or None)
-        # 按UMO分别保存更新信息
-        self.update_info: dict[str, dict[str, RssUpdateInfo]] = {}
+    async def _get_update_info(
+        self, subscription: RssSubscription
+    ) -> RssUpdateInfo | None:
+        key = f"updateinfo_{subscription['umo']}_{subscription['url']}"
+        data = await self.plugin.get_kv_data(key, None)
+        if data is None:
+            return None
+        return json.loads(data)
+
+    async def _set_update_info(
+        self, subscription: RssSubscription, update_info: RssUpdateInfo
+    ) -> None:
+        key = f"updateinfo_{subscription['umo']}_{subscription['url']}"
+        await self.plugin.put_kv_data(key, json.dumps(update_info, ensure_ascii=False))
+
+    async def _delete_update_info(self, subscription: RssSubscription) -> None:
+        key = f"updateinfo_{subscription['umo']}_{subscription['url']}"
+        if (await self.plugin.get_kv_data(key, None)) is not None:
+            await self.plugin.delete_kv_data(key)
 
     async def update_rss(
-        self, umo: str, url: str, force: bool = False
+        self, subscription: RssSubscription, force: bool = False
     ) -> list[RssItem]:
         """获取RSS订阅在给定时间范围内的更新内容。
 
@@ -85,20 +107,18 @@ class Rss:
         headers: dict[str, str] = {}
         last_updated: datetime = datetime.fromtimestamp(0, timezone.utc)
 
-        if umo not in self.update_info:
-            self.update_info[umo] = {}
-        # 如果不忽略缓存，且存在缓存的headers，使用条件请求
+        # 如果不忽略缓存，且存在更新信息，使用条件请求
         if not force:
-            if cache := self.update_info[umo].get(url, None):
-                if etag := cache["etag"]:
+            if update_info := await self._get_update_info(subscription):
+                if etag := update_info["etag"]:
                     headers["If-None-Match"] = etag
-                if last_modified := cache["last_modified"]:
+                if last_modified := update_info["last_modified"]:
                     headers["If-Modified-Since"] = last_modified
-                last_updated = cache["last_updated"]
+                last_updated = datetime.fromisoformat(update_info["last_updated"])
 
         try:
             response = await self.client.get(
-                url, headers=headers, follow_redirects=True
+                subscription["url"], headers=headers, follow_redirects=True
             )
 
             # 304 Not Modified - 内容未更新
@@ -108,11 +128,14 @@ class Rss:
             response.raise_for_status()
 
             # 更新缓存headers
-            self.update_info[umo][url] = {
-                "etag": response.headers.get("etag", ""),
-                "last_modified": response.headers.get("last-modified", ""),
-                "last_updated": datetime.now(timezone.utc),
-            }
+            await self._set_update_info(
+                subscription,
+                {
+                    "etag": response.headers.get("etag", ""),
+                    "last_modified": response.headers.get("last-modified", ""),
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                },
+            )
 
             # 解析RSS内容
             feed_data = feedparser.parse(response.text)
@@ -148,7 +171,7 @@ class Rss:
             return new_entries
 
         except Exception as e:
-            logger.error(f"更新RSS失败: {url}, 错误: {e}")
+            logger.error(f"更新RSS失败: {subscription['url']}, 错误: {e}")
             return []
 
     def generate_update_result(
@@ -200,7 +223,7 @@ class Rss:
             f.write(json.dumps(sub, ensure_ascii=False) + "\n")
         return sub
 
-    def delete_subscription(self, name: str, umo: str) -> bool:
+    async def delete_subscription(self, name: str, umo: str) -> bool:
         """删除RSS订阅。
 
         Args:
@@ -229,11 +252,14 @@ class Rss:
             return False
 
         # 删除该行
-        lines.pop(delete_index)
+        subscription = lines.pop(delete_index)
 
         # 写回文件
         with self.subscription_file.open("w", encoding="utf-8") as f:
             f.writelines(lines)
+
+        # 删除更新记录
+        await self._delete_update_info(json.loads(subscription))
 
         return True
 

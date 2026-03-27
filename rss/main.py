@@ -14,7 +14,7 @@ class RssPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
         self.context = context
-        self.rss = Rss(self.name, astrbot_config.get("http_proxy", ""))
+        self.rss = Rss(self, astrbot_config.get("http_proxy", ""))
         self.update_jobs: list[CronJob] = []
 
     async def initialize(self):
@@ -63,7 +63,7 @@ class RssPlugin(Star):
 
         if sub := self.rss.get_subscription(name, umo):
             await self.delete_update_job(sub)
-            self.rss.delete_subscription(name, umo)
+            await self.rss.delete_subscription(name, umo)
             return event.plain_result(f"✅ 已成功删除订阅 '{name}'")
 
         return event.plain_result(f"❌ 未找到订阅 '{name}'")
@@ -103,9 +103,7 @@ class RssPlugin(Star):
 
         yield event.plain_result(f"🔍 正在检查 '{name}' 的更新...")
 
-        entries = await self.rss.update_rss(
-            subscription["umo"], subscription["url"], force
-        )
+        entries = await self.rss.update_rss(subscription, force)
 
         # 使用Jinja模板格式化结果
         result_text = self.rss.generate_update_result(name, entries, max_display)
@@ -130,9 +128,7 @@ class RssPlugin(Star):
             logger.info(
                 f"开始检查RSS订阅 '{subscription['name']}' (umo: {subscription['umo']}) 的更新"
             )
-            entries = await self.rss.update_rss(
-                subscription["umo"], subscription["url"]
-            )
+            entries = await self.rss.update_rss(subscription)
             if not entries:
                 logger.info(
                     f"RSS订阅 '{subscription['name']}' (umo: {subscription['umo']}) 没有更新"
@@ -227,7 +223,7 @@ class RssPlugin(Star):
 
         if sub := self.rss.get_subscription(name, umo):
             await self.delete_update_job(sub)
-            self.rss.delete_subscription(name, umo)
+            await self.rss.delete_subscription(name, umo)
             return f"已成功删除订阅 '{name}'"
 
         return f"未找到订阅 '{name}'"
@@ -256,9 +252,7 @@ class RssPlugin(Star):
         if not subscription:
             return f"未找到订阅 '{name}'"
 
-        entries = await self.rss.update_rss(
-            subscription["umo"], subscription["url"], force
-        )
+        entries = await self.rss.update_rss(subscription, force)
 
         # 将entries转换为JSON格式返回
         entries_data = []
