@@ -5,7 +5,7 @@ from astrbot.core import astrbot_config
 from .idolypride import IdolyPride
 
 
-class MyPlugin(Star):
+class IdolyPridePlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
         self.ip = IdolyPride(astrbot_config.get("http_proxy", ""))
