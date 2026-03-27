@@ -20,7 +20,9 @@ class BilibiliPlugin(Star):
         vid = None
 
         # 匹配短链接
-        if short_match := re.search(self.bilibili.short_link_pattern, event.message_str):
+        if short_match := re.search(
+            self.bilibili.short_link_pattern, event.message_str
+        ):
             vid = await self.bilibili.get_bvid_from_short_link(short_match[0])
         else:
             # 匹配完整链接
