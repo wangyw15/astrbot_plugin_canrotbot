@@ -1,0 +1,6 @@
+标题: {{ data.title }}
+作品ID: {{ data.illust_id }}
+标签: {{ data.tags | join(', ') }}
+发布时间: {{ data.upload_date }}
+👍 {{ data.like }}  💬 {{ data.comment }}  👁️ {{ data.view }}
+{% if data.description %}简介: {{ data.description }}{% endif %}
