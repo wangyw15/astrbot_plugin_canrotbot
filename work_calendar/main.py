@@ -84,7 +84,7 @@ class WorkCalendarPlugin(Star):
         """获取指定日期是星期几。
 
         Args:
-            date: 日期字符串，格式为 YYYYMMDD，例如：'20251001'。
+            date(string): 日期字符串，格式为 YYYYMMDD，例如：'20251001'。
 
         Returns:
             星期几的字符串表示，例如：'星期一'、'星期二'等，如果日期解析失败则返回错误信息。
