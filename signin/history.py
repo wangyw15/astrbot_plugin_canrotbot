@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import TypedDict
 
@@ -52,7 +52,7 @@ class HistoryManager:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     def get_today_record(self, uid: str) -> SigninHistory | None:
-        with self.history_file.open("r", encoding="utf8") as f:
+        with self.history_file.open("r", encoding="utf-8") as f:
             while line := f.readline():
                 row: SigninHistory = json.loads(line)
                 if row["uid"] == uid:
@@ -84,3 +84,36 @@ class HistoryManager:
             return None
 
         return image_path
+
+    def get_history_record(
+        self, uid: str, date_from: date | None = None, date_to: date | None = None
+    ) -> list[SigninHistory]:
+        if date_from is None:
+            date_from = date.fromtimestamp(0)
+
+        if date_to is None:
+            date_to = datetime.now().date()
+
+        record: list[SigninHistory] = []
+        with self.history_file.open("r", encoding="utf-8") as f:
+            while line := f.readline():
+                row: SigninHistory = json.loads(line)
+                if row["uid"] == uid:
+                    record_date = datetime.fromisoformat(row["time"]).date()
+                    if date_from <= record_date and record_date <= date_to:
+                        record.append(row)
+        return record
+
+    def parse_date(self, date_str: str) -> datetime | None:
+        date_format = [
+            "%Y/%m/%d",
+            "%Y-%m-%d",
+            "%Y.%m.%d",
+            "%Y%m%d",
+        ]
+
+        for i in date_format:
+            try:
+                return datetime.strptime(date_str, i)
+            except ValueError:
+                continue
