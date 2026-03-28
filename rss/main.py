@@ -17,12 +17,25 @@ class RssPlugin(Star):
         self.rss = Rss(self, astrbot_config.get("http_proxy", ""))
         self.update_jobs: list[CronJob] = []
 
-    async def initialize(self):
-        all_job_names = [i.name for i in await self.context.cron_manager.list_jobs()]
+    async def clear_update_jobs(self):
+        for job in self.update_jobs:
+            await self.context.cron_manager.delete_job(job.job_id)
+        self.update_jobs = []
+
+        all_jobs = {x.name: x for x in await self.context.cron_manager.list_jobs()}
         for subscription in self.rss.list_all_subscriptions():
-            if self._generate_job_name(subscription) in all_job_names:
-                continue
+            name = self._generate_job_name(subscription)
+            if name in all_jobs:
+                await self.context.cron_manager.delete_job(all_jobs[name].job_id)
+
+    async def initialize(self):
+        await self.clear_update_jobs()
+
+        for subscription in self.rss.list_all_subscriptions():
             await self.add_update_job(subscription)
+
+    async def terminate(self) -> None:
+        await self.clear_update_jobs()
 
     @filter.command_group("rss")
     async def rss_command_group():

@@ -8,6 +8,7 @@ from .tieba import AccountManager, BaiduAccount, ResultManager, TiebaSignin
 
 class TiebaSigninPlugin(Star):
     SIGNIN_JOB_NAME = "tieba_signin"
+
     def __init__(self, context: Context):
         super().__init__(context)
         self.context = context
@@ -18,11 +19,16 @@ class TiebaSigninPlugin(Star):
 
         self.signin_job: CronJob | None = None
 
-    async def initialize(self):
+    async def clear_signin_jobs(self):
+        if self.signin_job is not None:
+            await self.context.cron_manager.delete_job(self.signin_job.job_id)
+
         for job in await self.context.cron_manager.list_jobs():
             if job.name == self.SIGNIN_JOB_NAME:
-                self.signin_job = job
-                return
+                await self.context.cron_manager.delete_job(job.job_id)
+
+    async def initialize(self):
+        await self.clear_signin_jobs()
 
         self.signin_job = await self.context.cron_manager.add_basic_job(
             name=self.SIGNIN_JOB_NAME,
@@ -31,6 +37,9 @@ class TiebaSigninPlugin(Star):
             description="贴吧自动签到",
             persistent=True,
         )
+
+    async def terminate(self):
+        await self.clear_signin_jobs()
 
     @filter.command_group("tieba")
     async def tieba_command_group():
