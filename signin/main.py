@@ -1,8 +1,13 @@
 import json
 from datetime import datetime
+from typing import Any
 
+from mcp.types import CallToolResult
+
+from astrbot.api import message_components as Comp
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
+from astrbot.core.agent.tool import FunctionTool
 
 from .fortune import Fortune
 from .history import HistoryManager
@@ -70,10 +75,38 @@ class SigninPlugin(Star):
 
         每天第一次签到会提供新的运势，当天多次签到只会返回第一次签到的结果
         """
-        yield await self.signin_command(event)
+        uid = event.get_sender_id()
+        today_signed = self.history.get_today_record(uid) is not None
 
-        if today_record := self.history.get_today_record(event.get_sender_id()):
-            yield today_record["title"] + "\n" + today_record["content"]
+        await self.signin_command(event)
+
+        if today_record := self.history.get_today_record(uid):
+            llm_response: dict[str, Any] = dict(today_record.items())
+            llm_response.pop("theme")
+            llm_response["repeat_signin"] = today_signed
+            yield json.dumps(llm_response, ensure_ascii=False)
+
+    @filter.on_llm_tool_respond()
+    async def set_signin_tool_call_status(
+        self,
+        event: AstrMessageEvent,
+        tool: FunctionTool,
+        tool_args: dict | None,
+        tool_result: CallToolResult | None,
+    ) -> None:
+        if tool.name == "signin":
+            event.set_extra("called_signin_tool", True)
+
+    @filter.on_decorating_result()
+    async def signin_response_add_image(self, event: AstrMessageEvent):
+        if not event.get_extra("called_signin_tool", False):
+            return
+
+        if result := event.get_result():
+            uid = event.get_sender_id()
+            image_path = self.history.get_latest_image_path(uid)
+            if image_path is not None and image_path.exists():
+                result.chain.insert(0, Comp.Image.fromFileSystem(str(image_path)))
 
     @filter.llm_tool("signin_get_history_records")
     async def signin_history_tool(
