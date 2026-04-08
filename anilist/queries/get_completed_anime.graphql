@@ -1,0 +1,96 @@
+query getUserCompletedAnimeList($userName: String!, $chunk: Int, $perChunk: Int) {
+    MediaListCollection(
+        userName: $userName,
+        type: ANIME,
+        status: COMPLETED,
+        chunk: $chunk,
+        perChunk: $perChunk
+    ) {
+        user {
+            name
+            statistics {
+                anime {
+                    count
+                    meanScore
+                    minutesWatched
+                    episodesWatched
+                }
+            }
+        }
+        lists {
+            name
+            status
+            isCustomList
+            entries {
+                id
+                status
+                score
+                progress
+                progressVolumes
+                repeat
+                priority
+                private
+                notes
+                startedAt {
+                    year
+                    month
+                    day
+                }
+                completedAt {
+                    year
+                    month
+                    day
+                }
+                updatedAt
+                createdAt
+                media {
+                    id
+                    idMal
+                    title {
+                        romaji
+                        english
+                        native
+                        userPreferred
+                    }
+                    type
+                    format
+                    status
+                    episodes
+                    duration
+                    genres
+                    tags {
+                        name
+                    }
+                    averageScore
+                    popularity
+                    season
+                    seasonYear
+                    startDate {
+                        year
+                        month
+                        day
+                    }
+                    endDate {
+                        year
+                        month
+                        day
+                    }
+                    coverImage {
+                        large
+                        medium
+                        color
+                    }
+                    studios {
+                        nodes {
+                            id
+                            name
+                            isAnimationStudio
+                        }
+                    }
+                    siteUrl
+                }
+            }
+        }
+        hasNextChunk
+    }
+}

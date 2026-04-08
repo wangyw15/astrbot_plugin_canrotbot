@@ -26,4 +26,4 @@ class AniListMessage:
             "anilist_search_md.jinja" if markdown else "anilist_search.jinja"
         )
         template = cls.JINJA_ENV.get_template(template_name)
-        return template.render(data=data["data"]["Page"]["media"][0], with_url=with_url)
+        return template.render(data=data, with_url=with_url)
