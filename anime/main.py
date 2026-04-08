@@ -4,9 +4,7 @@ from typing import Any
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
 from astrbot.core import astrbot_config
-from astrbot.core.star.filter.command import GreedyStr
 
-from .anilist import AniList
 from .bangumi import Bangumi
 from .message import AnimeMessage
 
@@ -14,18 +12,11 @@ from .message import AnimeMessage
 class AnimePlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
-        self.anilist = AniList(astrbot_config.get("http_proxy", ""))
         self.bangumi = Bangumi(astrbot_config.get("http_proxy", ""))
 
     @filter.command_group("anime")
     async def anime_command(self):
         pass
-
-    @anime_command.command("search")
-    async def anilist_search_command(self, event: AstrMessageEvent, keyword: GreedyStr):
-        """通过AniList搜索番剧"""
-        data = await self.anilist.search_anime_by_title(keyword)
-        return event.plain_result(AnimeMessage.anilist_search(data))
 
     @anime_command.command("calendar")
     async def bangumi_calendar_command(self, event: AstrMessageEvent):
@@ -55,15 +46,3 @@ class AnimePlugin(Star):
             }
 
         return json.dumps(ret, ensure_ascii=False)
-
-    @filter.llm_tool("anilist_search_anime_by_title")
-    async def search_anime_by_title(self, event: AstrMessageEvent, keyword: str) -> str:
-        """
-        通过 AniList API 根据标题获取番剧的详细信息
-        该 API 仅支持使用英语和日语搜索，不保证支持中文搜索
-
-        Args:
-            keyword(string): 番剧标题关键词
-        """
-        data = await self.anilist.search_anime_by_title(keyword)
-        return json.dumps(data, ensure_ascii=False)

@@ -1,0 +1,37 @@
+query SearchQuery($search: String) {
+    Page(page: 0, perPage: 1) {
+        media(type: ANIME, search: $search) {
+            title {
+                native
+                english
+            }
+            description
+            format
+            episodes
+            season
+            seasonYear
+            startDate {
+                year
+                month
+                day
+            }
+            endDate {
+                year
+                month
+                day
+            }
+            status
+            synonyms
+            genres
+            tags {
+                name
+            }
+            coverImage {
+                large
+                medium
+                color
+            }
+            siteUrl
+        }
+    }
+}

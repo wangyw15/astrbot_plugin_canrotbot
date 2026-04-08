@@ -1,0 +1,5 @@
+name: anilist
+display_name: AniList
+desc: 基于AniList提供番剧搜索和查询列表等功能
+version: v1.0.0
+author: wangyw15

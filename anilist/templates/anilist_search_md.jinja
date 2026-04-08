@@ -15,3 +15,5 @@
 {%- elif data.season == "WINTER" %}冬季{% endif %}
 
 **标签**: {% for tag in data.tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+
+{% if with_url %}链接: [{{data.title.native}}]({{ data.siteUrl }}){% endif %}

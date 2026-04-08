@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from httpx import AsyncClient
@@ -8,41 +9,10 @@ class AniList:
 
     def __init__(self, proxy: str = "") -> None:
         self.client = AsyncClient(proxy=proxy or None)
+        self.queries = Path(__file__).parent / "queries"
 
     async def search_anime_by_title(self, keyword: str) -> dict[str, Any]:
-        query = """
-query SearchQuery($search: String) {
-    Page(page: 0, perPage: 1) {
-        media(type: ANIME, search: $search) {
-            title {
-                native
-                english
-            }
-            description
-            format
-            episodes
-            season
-            seasonYear
-            startDate {
-                year
-                month
-                day
-            }
-            endDate {
-                year
-                month
-                day
-            }
-            status
-            synonyms
-            genres
-            tags {
-                name
-            }
-        }
-    }
-}
-"""
+        query = (self.queries / "search_anime.graphql").read_text(encoding="utf-8")
         variables = {
             "search": keyword,
         }
