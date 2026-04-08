@@ -31,7 +31,7 @@ class Weather:
             self.api_url + "taf",
             params={
                 "ids": icao_codes,
-                "metar=": str(include_metar).lower(),
+                "metar": str(include_metar).lower(),
                 "format": "json",
             },
         )

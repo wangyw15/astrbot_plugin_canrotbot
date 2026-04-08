@@ -60,6 +60,6 @@ class AviationPlugin(Star):
             msg = ""
             for taf in result:
                 msg += taf["icaoId"] + "(" + taf["name"] + ")\n"
-                msg += taf["rawOb"] + "\n\n"
+                msg += taf["rawTAF"] + "\n\n"
             return event.plain_result(msg.strip())
         return event.plain_result("TAF信息获取失败")
