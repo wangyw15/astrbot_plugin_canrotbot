@@ -1,0 +1,16 @@
+标题:
+{{ data.video.title }}
+UP主:
+{{ data.video.owner.name }}
+上传时间: {{ to_local_time(data.video.registeredAt) }}
+播放: {{ data.video.count.view }}
+评论: {{ data.video.count.comment }}
+点赞: {{ data.video.count.like }}
+收藏: {{ data.video.count.mylist }}
+时长: {{ data.video.duration // 60 }}:{{ "%02d" % (data.video.duration % 60) }}
+简介:
+{{ clean_description(data.video.shortDescription) }}
+{% if with_url %}
+视频链接:
+https://www.nicovideo.jp/watch/{{ data.watchId }}
+{% endif %}
