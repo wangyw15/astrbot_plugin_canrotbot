@@ -1,0 +1,11 @@
+{%- for row in grid -%}
+{% for col in row %}{{ col }}{% endfor %}
+{% endfor %}
+{% if details -%}
+【详细结果】
+{%- for detail in details %}
+{{ detail.symbol }} {{ detail.pattern }} {{ detail.points }} 
+{% endfor %}
+{% endif -%}
+【总得分】
+{{ total_score }}
