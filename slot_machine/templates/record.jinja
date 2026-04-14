@@ -1,0 +1,20 @@
+【老虎机记录】
+总得分：{{ record.total_score }}
+总次数：{{ record.total_spin }}
+场均得分：{% if record.total_spin > 0 %}{{ (record.total_score / record.total_spin) | round(2) }}{% else %}0{% endif %}
+{% if record.best -%}
+【最佳记录】
+{%- for row in record.best.grid %}
+{% for col in row %}{{ col }}{% endfor %}
+{% endfor %}
+{% if record.best.details -%}
+【详细结果】
+{%- for detail in record.best.details %}
+{{ detail.symbol }} {{ detail.pattern }} {{ detail.points }} 
+{% endfor %}
+{% endif -%}
+【总得分】
+{{ record.best.total_score }}
+{% else -%}
+暂无最佳记录
+{% endif -%}

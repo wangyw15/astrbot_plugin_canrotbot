@@ -1,14 +1,100 @@
+import json
 import random
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TypedDict
 
 from jinja2 import Environment, FileSystemLoader, Template
 
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
-class Result(TypedDict):
+T_SpinGrid = list[list[str]]
+
+
+class ResultDetail(TypedDict):
     pattern: str
     symbol: str
     points: float
+
+
+class SpinRecord(TypedDict):
+    time: str
+    grid: T_SpinGrid
+    total_score: float
+    details: list[ResultDetail]
+
+
+class UserRecord(TypedDict):
+    total_score: float
+    total_spin: int
+    best: SpinRecord | None
+
+
+class ScoreManager:
+    def __init__(self, plugin_name: str = "slot_machine") -> None:
+        self.template_path = Path(__file__).parent / "templates"
+        self.jinja_env = Environment(loader=FileSystemLoader([self.template_path]))
+
+        self.data_path = Path(get_astrbot_data_path()) / "plugin_data" / plugin_name
+        if not self.data_path.exists():
+            self.data_path.mkdir(parents=True)
+
+        self.record_path = self.data_path / "records"
+        if not self.record_path.exists():
+            self.record_path.mkdir(parents=True)
+
+        self.spin_path = self.data_path / "spins"
+        if not self.spin_path.exists():
+            self.spin_path.mkdir(parents=True)
+
+    def get_record(self, uid: str) -> UserRecord | None:
+        record_file = self.record_path / f"{uid}.json"
+        if not record_file.exists():
+            return None
+
+        with record_file.open("r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def add_spin(
+        self,
+        uid: str,
+        grid: T_SpinGrid,
+        total_score: float,
+        details: list[ResultDetail],
+    ):
+        spin: SpinRecord = {
+            "time": datetime.now().astimezone(timezone.utc).isoformat(),
+            "grid": grid,
+            "total_score": total_score,
+            "details": details,
+        }
+
+        spin_file = self.spin_path / f"{uid}.jsonl"
+        if not spin_file.exists():
+            spin_file.touch()
+        with spin_file.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(spin, ensure_ascii=False) + "\n")
+
+        record: UserRecord = self.get_record(uid) or {
+            "total_score": 0.0,
+            "total_spin": 0,
+            "best": None,
+        }
+        record["total_score"] += total_score
+        record["total_spin"] += 1
+        if record["best"] is None or total_score > record["best"]["total_score"]:
+            record["best"] = spin
+
+        record_file = self.record_path / f"{uid}.json"
+        with record_file.open("w", encoding="utf-8") as f:
+            json.dump(record, f, ensure_ascii=False)
+
+    def get_record_text(self, uid: str) -> str:
+        record = self.get_record(uid)
+        if record is None:
+            return "暂无老虎机记录"
+        template: Template = self.jinja_env.get_template("record.jinja")
+        return template.render(record=record)
 
 
 class SlotMachine:
@@ -40,14 +126,14 @@ class SlotMachine:
         self.rows = 3
         self.cols = 5
 
-        self.grid: list[list[str]] = []
-        self.score_details: list[Result] = []
+        self.grid: T_SpinGrid = []
+        self.score_details: list[ResultDetail] = []
         self.total_score = 0.0
 
         self.template_path = Path(__file__).parent / "templates"
         self.jinja_env = Environment(loader=FileSystemLoader([self.template_path]))
 
-    def spin(self):
+    def spin(self) -> T_SpinGrid:
         """生成随机老虎机结果"""
         symbols = list(self.SYMBOLS.keys())
         weights = [self.SYMBOLS[s]["weight"] for s in symbols]
@@ -89,12 +175,12 @@ class SlotMachine:
                 return symbol
         return None
 
-    def calculate_score(self) -> tuple[float, list[Result]]:
+    def calculate_score(self) -> tuple[float, list[ResultDetail]]:
         """计算总得分"""
         if not self.grid:
             self.spin()
 
-        score_details: list[Result] = []
+        score_details: list[ResultDetail] = []
         total_score = 0
 
         # 记录已使用计分的行
