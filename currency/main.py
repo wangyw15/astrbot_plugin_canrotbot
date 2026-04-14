@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Literal
 
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
@@ -21,6 +22,17 @@ class CurrencyPlugin(Star):
     @filter.command("currency")
     async def currency_command(self, event: AstrMessageEvent, currency: str):
         """通过命令查询指定货币的汇率"""
+        result = await self._query_currency(currency)
+        return event.plain_result(result)
+
+    @filter.llm_tool("query_currency")
+    async def query_currency_tool(self, event: AstrMessageEvent, currency: str):
+        """查询指定货币对人民币的汇率。currency 参数可以是货币的中文名称（如 日元、美元）或英文代码（如 JPY、USD）。"""
+        return await self._query_currency(currency, "markdown")
+
+    async def _query_currency(
+        self, currency: str, format: Literal["plain", "markdown"] = "plain"
+    ) -> str:
         currencies = await self.currency.fetch()
 
         for item in currencies:
@@ -28,9 +40,9 @@ class CurrencyPlugin(Star):
                 currency.lower() == item["currencyENName"].lower()
                 or currency == item["currencyCHName"]
             ):
-                return event.plain_result(self.currency.generate_info(item))
+                return self.currency.generate_info(item, format)
 
-        return event.plain_result(f"未找到货币: {currency}")
+        return f"未找到货币: {currency}"
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def currency_regex(self, event: AstrMessageEvent):
