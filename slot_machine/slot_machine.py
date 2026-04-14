@@ -19,7 +19,7 @@ class SlotMachine:
         "🔔": {"amount": 3, "weight": 149},
         "💎": {"amount": 5, "weight": 119},
         "🎁": {"amount": 5, "weight": 119},
-        "⭐": {"amount": 7, "weight": 76},
+        "7️⃣": {"amount": 7, "weight": 76},
     }
 
     PATTERN = {
