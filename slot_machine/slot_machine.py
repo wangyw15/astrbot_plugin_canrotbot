@@ -90,11 +90,16 @@ class ScoreManager:
             json.dump(record, f, ensure_ascii=False)
 
     def get_record_text(self, uid: str) -> str:
+        def _convert_time(time: str) -> str:
+            return (
+                datetime.fromisoformat(time).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+            )
+
         record = self.get_record(uid)
         if record is None:
             return "暂无老虎机记录"
         template: Template = self.jinja_env.get_template("record.jinja")
-        return template.render(record=record)
+        return template.render(record=record, convert_time=_convert_time)
 
 
 class SlotMachine:
