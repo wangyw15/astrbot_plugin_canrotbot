@@ -9,7 +9,7 @@
 当前连续0分：{{ record.current_zero_streak }}
 {% if record.symbol_score %}
 【图标统计】
-{% for symbol, score in record.symbol_score.items() -%}
+{% for symbol, score in record.symbol_score | dictsort(false, "value", true) -%}
 {{ symbol }} 次数：{{ record.symbol_count.get(symbol, 0) }} 总分：{{ score }}
 {% endfor %}
 {%- endif -%}
