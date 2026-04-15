@@ -27,8 +27,11 @@ class SpinRecord(TypedDict):
 class UserRecord(TypedDict):
     total_score: float
     total_spin: int
+    total_zero_spin: int
     longest_zero_streak: int
     current_zero_streak: int
+    symbol_score: dict[str, float]
+    symbol_count: dict[str, int]
     best: SpinRecord | None
 
 
@@ -55,6 +58,9 @@ class ScoreManager:
         longest_zero_streak = 0
         best: SpinRecord | None = None
         total_score = 0.0
+        total_zero_spin = 0
+        symbol_score: dict[str, float] = {}
+        symbol_count: dict[str, int] = {}
 
         temp_streak = 0
         for spin in spins:
@@ -65,10 +71,16 @@ class ScoreManager:
                 best = spin
 
             if score == 0:
+                total_zero_spin += 1
                 temp_streak += 1
                 longest_zero_streak = max(longest_zero_streak, temp_streak)
             else:
                 temp_streak = 0
+
+            for detail in spin["details"]:
+                symbol = detail["symbol"]
+                symbol_score[symbol] = symbol_score.get(symbol, 0.0) + detail["points"]
+                symbol_count[symbol] = symbol_count.get(symbol, 0) + 1
 
         current_zero_streak = 0
         for spin in reversed(spins):
@@ -80,8 +92,11 @@ class ScoreManager:
         return {
             "total_score": total_score,
             "total_spin": len(spins),
+            "total_zero_spin": total_zero_spin,
             "longest_zero_streak": longest_zero_streak,
             "current_zero_streak": current_zero_streak,
+            "symbol_score": symbol_score,
+            "symbol_count": symbol_count,
             "best": best,
         }
 
@@ -127,7 +142,13 @@ class ScoreManager:
         if record["best"] is None or total_score > record["best"]["total_score"]:
             record["best"] = spin
 
+        for detail in details:
+            symbol = detail["symbol"]
+            record["symbol_score"][symbol] += detail["points"]
+            record["symbol_count"][symbol] += 1
+
         if total_score == 0:
+            record["total_zero_spin"] += 1
             record["current_zero_streak"] += 1
             record["longest_zero_streak"] = max(
                 record["longest_zero_streak"], record["current_zero_streak"]
