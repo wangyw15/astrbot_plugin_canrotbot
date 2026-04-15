@@ -2,6 +2,8 @@
 总得分：{{ record.total_score }}
 总次数：{{ record.total_spin }}
 场均得分：{% if record.total_spin > 0 %}{{ (record.total_score / record.total_spin) | round(2) }}{% else %}0{% endif %}
+最长连续0分：{{ record.longest_zero_streak }}
+当前连续0分：{{ record.current_zero_streak }}
 {% if record.best %}
 【最佳记录】
 时间：{{ convert_time(record.best.time) }}

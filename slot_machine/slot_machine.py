@@ -2,7 +2,7 @@ import json
 import random
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TypedDict
+from typing import Any, TypedDict, cast
 
 from jinja2 import Environment, FileSystemLoader, Template
 
@@ -27,6 +27,8 @@ class SpinRecord(TypedDict):
 class UserRecord(TypedDict):
     total_score: float
     total_spin: int
+    longest_zero_streak: int
+    current_zero_streak: int
     best: SpinRecord | None
 
 
@@ -47,13 +49,57 @@ class ScoreManager:
         if not self.spin_path.exists():
             self.spin_path.mkdir(parents=True)
 
-    def get_record(self, uid: str) -> UserRecord | None:
-        record_file = self.record_path / f"{uid}.json"
-        if not record_file.exists():
-            return None
+    def _rebuild_record_from_spins(self, uid: str) -> UserRecord:
+        spins = self.get_spins(uid)
 
-        with record_file.open("r", encoding="utf-8") as f:
-            return json.load(f)
+        longest_zero_streak = 0
+        best: SpinRecord | None = None
+        total_score = 0.0
+
+        temp_streak = 0
+        for spin in spins:
+            score = spin["total_score"]
+            total_score += score
+
+            if best is None or score > best["total_score"]:
+                best = spin
+
+            if score == 0:
+                temp_streak += 1
+                longest_zero_streak = max(longest_zero_streak, temp_streak)
+            else:
+                temp_streak = 0
+
+        current_zero_streak = 0
+        for spin in reversed(spins):
+            if spin["total_score"] == 0:
+                current_zero_streak += 1
+            else:
+                break
+
+        return {
+            "total_score": total_score,
+            "total_spin": len(spins),
+            "longest_zero_streak": longest_zero_streak,
+            "current_zero_streak": current_zero_streak,
+            "best": best,
+        }
+
+    def get_record(self, uid: str) -> UserRecord:
+        record: UserRecord | dict[str, Any] = {}
+
+        record_file = self.record_path / f"{uid}.json"
+        if record_file.exists():
+            with record_file.open("r", encoding="utf-8") as f:
+                record = json.load(f)
+
+        expected_keys = set(UserRecord.__annotations__.keys())
+        if not expected_keys.issubset(record.keys()):
+            record = self._rebuild_record_from_spins(uid)
+            with record_file.open("w", encoding="utf-8") as f:
+                json.dump(record, f, ensure_ascii=False)
+
+        return cast(UserRecord, record)
 
     def add_spin(
         self,
@@ -75,15 +121,19 @@ class ScoreManager:
         with spin_file.open("a", encoding="utf-8") as f:
             f.write(json.dumps(spin, ensure_ascii=False) + "\n")
 
-        record: UserRecord = self.get_record(uid) or {
-            "total_score": 0.0,
-            "total_spin": 0,
-            "best": None,
-        }
+        record: UserRecord = self.get_record(uid)
         record["total_score"] += total_score
         record["total_spin"] += 1
         if record["best"] is None or total_score > record["best"]["total_score"]:
             record["best"] = spin
+
+        if total_score == 0:
+            record["current_zero_streak"] += 1
+            record["longest_zero_streak"] = max(
+                record["longest_zero_streak"], record["current_zero_streak"]
+            )
+        else:
+            record["current_zero_streak"] = 0
 
         record_file = self.record_path / f"{uid}.json"
         with record_file.open("w", encoding="utf-8") as f:
@@ -100,6 +150,21 @@ class ScoreManager:
             return "暂无老虎机记录"
         template: Template = self.jinja_env.get_template("record.jinja")
         return template.render(record=record, convert_time=_convert_time)
+
+    def get_spins(self, uid: str) -> list[SpinRecord]:
+        spin_file = self.spin_path / f"{uid}.jsonl"
+        if not spin_file.exists():
+            return []
+
+        spins: list[SpinRecord] = []
+        with spin_file.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                spin: SpinRecord = json.loads(line)
+                spins.append(spin)
+        return spins
 
 
 class SlotMachine:
