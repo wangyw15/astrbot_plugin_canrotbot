@@ -3,7 +3,7 @@
 {% endfor %}
 {% if details -%}
 【详细结果】
-{%- for detail in details %}
+{% for detail in details -%}
 {{ detail.symbol }} {{ detail.pattern }} {{ detail.points }} 
 {% endfor %}
 {% endif -%}
