@@ -1,0 +1,19 @@
+{%- if product.info -%}
+中文名称: {{ product.info.chinese_name }}
+英文名称: {{ product.info.english_name }}
+CAS号: {{ product.info.cas }}
+分子式: {{ product.info.molecular_formula }}
+分子量: {{ product.info.molecular_weight }}
+EINECS号: {{ product.info.einecs }}
+MDL No.: {{ product.info.mdl }}
+{%- endif %}
+{% for info in product.suppliers -%}
+{% if info.prices %}
+供应商: {{ info.supplier }}
+{% for price in info.prices -%}
+-  {{ price.spec }} - ¥{{ price.price }}
+{% endfor -%}
+{%- endif -%}
+{% else %}
+暂无供应商报价
+{% endfor %}
