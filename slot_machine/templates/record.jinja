@@ -2,6 +2,7 @@
 总得分：{{ record.total_score }}
 总次数：{{ record.total_spin }}
 场均得分：{% if record.total_spin > 0 %}{{ (record.total_score / record.total_spin) | round(2) }}{% else %}0{% endif %}
+非0场均分：{% if (record.total_spin - record.total_zero_spin) > 0 %}{{ (record.total_score / (record.total_spin - record.total_zero_spin)) | round(2) }}{% else %}0{% endif %}
 
 【0分记录】
 总0分场次：{{ record.total_zero_spin }}

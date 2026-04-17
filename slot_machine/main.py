@@ -11,7 +11,8 @@ class SlotMachinePlugin(Star):
         self.score_manager = ScoreManager()
 
     def _spin(self, uid: str) -> str:
-        self.slot_machine.spin()
+        record = self.score_manager.get_record(uid)
+        self.slot_machine.spin(record["current_zero_streak"])
         self.slot_machine.calculate_score()
 
         self.score_manager.add_spin(

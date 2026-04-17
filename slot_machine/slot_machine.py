@@ -226,16 +226,26 @@ class SlotMachine:
         self.template_path = Path(__file__).parent / "templates"
         self.jinja_env = Environment(loader=FileSystemLoader([self.template_path]))
 
-    def spin(self) -> T_SpinGrid:
+    def _fisher_yates(self, arr: list):
+        for i in range(len(arr) - 1, 0, -1):
+            j = random.randint(0, i)
+            arr[i], arr[j] = arr[j], arr[i]
+        return arr
+
+    def spin(self, luck: int = 0) -> T_SpinGrid:
         """生成随机老虎机结果"""
         symbols = list(self.SYMBOLS.keys())
         weights = [self.SYMBOLS[s]["weight"] for s in symbols]
+        flat_grid = random.choices(symbols, weights=weights, k=self.rows * self.cols)
 
-        self.grid = []
-        for _ in range(self.rows):
-            row = random.choices(symbols, weights=weights, k=self.cols)
-            self.grid.append(row)
+        # 幸运值机制
+        positions = list(range(self.rows * self.cols))
+        self._fisher_yates(positions)
+        replace_symbol = random.choices(symbols, weights=weights, k=1)[0]
+        for i in positions[:luck]:
+            flat_grid[i] = replace_symbol
 
+        self.grid = [flat_grid[row * self.cols: (row + 1) * self.cols] for row in range(self.rows)]
         return self.grid
 
     def get_symbol_amount(self, symbol: str) -> float:
