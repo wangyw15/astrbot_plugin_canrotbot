@@ -11,7 +11,7 @@ MDL No.: {{ product.info.mdl }}
 {% if info.prices %}
 供应商: {{ info.supplier }}
 {% for price in info.prices -%}
--  {{ price.spec }} - ¥{{ price.price }}
+-  {{ price.spec }} - {{ price.price }}
 {% endfor -%}
 {%- endif -%}
 {% else %}

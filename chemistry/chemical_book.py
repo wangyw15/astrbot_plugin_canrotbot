@@ -133,7 +133,7 @@ class ChemicalBook:
                         span = li.select_one("span")
                         if strong and span:
                             price_text = (
-                                strong.get_text(strip=True).replace("¥", "").strip()
+                                strong.get_text(strip=True).strip()
                             )
                             spec = span.get_text(strip=True)
                             prices.append(PriceItem(price=price_text, spec=spec))
