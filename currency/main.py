@@ -49,7 +49,7 @@ class CurrencyPlugin(Star):
         """根据正则自动触发汇率转换计算，如100jpy"""
         pattern = re.compile(r"((?:[\d()\-+*/.]+)?)([a-zA-Z]{3})((?:[a-zA-Z]{3})?)")
 
-        match = re.search(pattern, event.message_str)
+        match = re.fullmatch(pattern, event.message_str)
         if match is None:
             return
 

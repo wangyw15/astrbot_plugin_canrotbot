@@ -18,7 +18,7 @@ class ChemistryPlugin(Star):
 
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def cas_number_handler(self, event: AstrMessageEvent):
-        if match := re.search(self.cas.CAS_PATTERN, event.message_str):
+        if match := re.fullmatch(self.cas.CAS_PATTERN, event.message_str):
             cas_number = match[0]
             if self.cas.validate(cas_number):
                 product = await self.chemical_book.get_product(cas_number)
