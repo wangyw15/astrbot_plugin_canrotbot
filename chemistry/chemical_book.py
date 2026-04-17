@@ -30,7 +30,7 @@ class ProductInfo(TypedDict):
 
 
 class Product(TypedDict):
-    info: ProductInfo
+    info: ProductInfo | None
     suppliers: list[SupplierInfo]
 
 
@@ -73,18 +73,19 @@ class ChemicalBook:
         resp.raise_for_status()
         soup = BeautifulSoup(resp.content, "html.parser")
 
-        info: ProductInfo = {
-            "chinese_name": "",
-            "english_name": "",
-            "cas": "",
-            "molecular_formula": "",
-            "molecular_weight": "",
-            "einecs": "",
-            "mdl": "",
-            "structural_formula": "",
-        }
+        info: ProductInfo | None = None
 
         if plbox := soup.select_one("div.PLbox"):
+            info = {
+                "chinese_name": "",
+                "english_name": "",
+                "cas": "",
+                "molecular_formula": "",
+                "molecular_weight": "",
+                "einecs": "",
+                "mdl": "",
+                "structural_formula": "",
+            }
             if h2 := plbox.select_one("h2"):
                 info["chinese_name"] = h2.get_text(strip=True)
 

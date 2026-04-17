@@ -25,6 +25,9 @@ class ChemistryPlugin(Star):
                 if info is None:
                     return
 
+                if info["info"] is None:
+                    return event.plain_result("Chemical Book网站不提供该产品信息")
+
                 msg_chain = []
                 if info["info"]["structural_formula"]:
                     if image := await self.chemical_book.fetch_bytes(
