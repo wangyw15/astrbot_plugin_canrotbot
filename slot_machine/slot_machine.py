@@ -144,7 +144,9 @@ class ScoreManager:
 
         for detail in details:
             symbol = detail["symbol"]
-            record["symbol_score"][symbol] = record["symbol_score"].get(symbol, 0.0) + detail["points"]
+            record["symbol_score"][symbol] = (
+                record["symbol_score"].get(symbol, 0.0) + detail["points"]
+            )
             record["symbol_count"][symbol] = record["symbol_count"].get(symbol, 0) + 1
 
         if total_score == 0:
