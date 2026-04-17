@@ -1,0 +1,5 @@
+name: bangumi
+display_name: Bangumi番组计划
+desc: 通过Bangumi API查询番剧
+version: v1.0.0
+author: wangyw15

@@ -6,23 +6,23 @@ from astrbot.api.star import Context, Star
 from astrbot.core import astrbot_config
 
 from .bangumi import Bangumi
-from .message import AnimeMessage
+from .message import BangumiMessage
 
 
-class AnimePlugin(Star):
+class BangumiPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
         self.bangumi = Bangumi(astrbot_config.get("http_proxy", ""))
 
-    @filter.command_group("anime")
-    async def anime_command(self):
+    @filter.command_group("bangumi")
+    async def bangumi_command(self):
         pass
 
-    @anime_command.command("calendar")
+    @bangumi_command.command("calendar")
     async def bangumi_calendar_command(self, event: AstrMessageEvent):
         """通过番组计划获取当前番剧放送日历"""
         data = await self.bangumi.get_airing_calendar()
-        return event.plain_result(AnimeMessage.bangumi_calendar(data))
+        return event.plain_result(BangumiMessage.bangumi_calendar(data))
 
     @filter.llm_tool("bangumi_airing_calendar")
     async def get_airing_calendar_simple(self, event: AstrMessageEvent) -> str:

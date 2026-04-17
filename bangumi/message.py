@@ -4,7 +4,7 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader
 
 
-class AnimeMessage:
+class BangumiMessage:
     """番剧消息生成类"""
 
     # 初始化 Jinja2 环境
