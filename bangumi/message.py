@@ -25,7 +25,7 @@ class BangumiMessage:
             生成的消息文本
         """
         template_name = (
-            "bangumi_calendar_md.jinja" if markdown else "bangumi_calendar.jinja"
+            "calendar_md.jinja" if markdown else "calendar.jinja"
         )
         template = cls.JINJA_ENV.get_template(template_name)
         return template.render(data=data)
