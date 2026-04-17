@@ -1,0 +1,8 @@
+标题: {{ data.name_cn }} / {{ data.name }}
+共 {{ data.eps }} 集
+平台: {{ data.platform }}
+评分: {{ data.rating.score }}
+时间: {{ data.date }}
+标签: {% for tag in data.tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% if with_url %}链接: https://bgm.tv/subject/{{ data.id }}{% endif %}
+简介: {{ data.summary }}
