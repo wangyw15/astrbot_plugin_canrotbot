@@ -23,6 +23,10 @@ class AniListPlugin(Star):
     async def anilist_search_command(self, event: AstrMessageEvent, keyword: GreedyStr):
         """通过AniList搜索番剧"""
         data = await self.anilist.search_anime_by_title(keyword)
+        if not data:
+            return event.plain_result("AniList搜索结果为空")
+
+        data = data[0]
         return event.chain_result(
             [
                 Comp.Image.fromURL(data["coverImage"]["large"]),
@@ -36,14 +40,16 @@ class AniListPlugin(Star):
 
     @filter.llm_tool("anilist_search_anime_by_title")
     async def search_anime_by_title_tool(
-        self, event: AstrMessageEvent, keyword: str
+        self, event: AstrMessageEvent, keyword: str, count: int = 10
     ) -> str:
         """
-        通过 AniList API 根据标题获取番剧的详细信息
-        该 API 仅支持使用英语和日语搜索，不保证支持中文搜索
+        通过 AniList API 根据标题获取番剧的详细信息。
+        返回的搜索结果是根据名称匹配程度排序的，可能会含有一部分与关键词关联度或无关联的条目。
+        若用户使用番剧的英文或日文名，优先使用该tool进行搜索。
 
         Args:
             keyword(string): 番剧标题关键词
+            count(number): 返回结果条数，默认为前10条
         """
         data = await self.anilist.search_anime_by_title(keyword)
         return json.dumps(data, ensure_ascii=False)

@@ -23,14 +23,17 @@ class AniList:
         response.raise_for_status()
         return response.json()
 
-    async def search_anime_by_title(self, keyword: str) -> dict[str, Any]:
+    async def search_anime_by_title(
+        self, keyword: str, count: int = 10
+    ) -> list[dict[str, Any]]:
         response = await self.query(
             query=(self.queries / "search_anime.graphql").read_text(encoding="utf-8"),
             variables={
                 "search": keyword,
+                "perPage": count,
             },
         )
-        return response["data"]["Page"]["media"][0]
+        return response["data"]["Page"]["media"][:count]
 
     async def get_user_complete_anime_list(self, user_name: str) -> dict[str, Any]:
         result: dict[str, Any] = {"user": {}, "lists": []}

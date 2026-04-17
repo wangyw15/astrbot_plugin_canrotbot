@@ -1,6 +1,6 @@
-query SearchQuery($search: String) {
-    Page(page: 0, perPage: 1) {
-        media(type: ANIME, search: $search) {
+query SearchQuery($search: String, $perPage: Int) {
+    Page(page: 0, perPage: $perPage) {
+        media(type: ANIME, search: $search, format_not_in: [MUSIC, MANGA, NOVEL, ONE_SHOT]) {
             title {
                 native
                 english
