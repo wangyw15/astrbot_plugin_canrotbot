@@ -41,6 +41,8 @@ class ChemistryPlugin(Star):
                 )
 
                 return event.chain_result(msg_chain)
+            else:
+                return event.plain_result("输入的CAS号有误")
 
     @filter.llm_tool("chemical_book_get_product")
     async def chemical_book_get_product_tool(
