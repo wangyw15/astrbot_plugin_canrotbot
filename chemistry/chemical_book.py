@@ -38,7 +38,7 @@ class Product(TypedDict):
 class ChemicalBook:
     def __init__(self, proxy: str = "") -> None:
         self.cas = CAS()
-        self.client = AsyncClient(proxy=proxy or None)
+        self.client = AsyncClient(follow_redirects=True, proxy=proxy or None)
         self.client.headers = {
             "Referer": "https://www.chemicalbook.com/",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0",
