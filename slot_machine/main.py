@@ -24,10 +24,15 @@ class SlotMachinePlugin(Star):
         return self.slot_machine.generate_result()
 
     @filter.command("slot")
-    async def slot_machine_command(self, event: AstrMessageEvent):
-        """转一次老虎机"""
+    async def slot_machine_command(self, event: AstrMessageEvent, spin_count: int = 1):
+        """转老虎机，可指定次数"""
         uid = event.get_sender_id()
-        return event.plain_result(self._spin(uid))
+        if spin_count <= 1:
+            return event.plain_result(self._spin(uid))
+
+        results = [self._spin(uid) for _ in range(spin_count)]
+        sep = "\n" + "-" * 10 + "\n"
+        return event.plain_result(sep.join(results))
 
     @filter.command("slot_record")
     async def slot_machine_record_record_command(self, event: AstrMessageEvent):
