@@ -245,7 +245,10 @@ class SlotMachine:
         for i in positions[:luck]:
             flat_grid[i] = replace_symbol
 
-        self.grid = [flat_grid[row * self.cols: (row + 1) * self.cols] for row in range(self.rows)]
+        self.grid = [
+            flat_grid[row * self.cols : (row + 1) * self.cols]
+            for row in range(self.rows)
+        ]
         return self.grid
 
     def get_symbol_amount(self, symbol: str) -> float:
