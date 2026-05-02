@@ -1,0 +1,8 @@
+{
+  "max_spin_count": {
+    "description": "最大次数",
+    "type": "int",
+    "hint": "slot指令中，单次调用最大可以转转老虎机的次数",
+    "default": "10"
+  }
+}

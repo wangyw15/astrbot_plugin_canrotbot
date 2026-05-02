@@ -1,3 +1,4 @@
+from astrbot.api import AstrBotConfig
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
 
@@ -5,10 +6,12 @@ from .slot_machine import ScoreManager, SlotMachine
 
 
 class SlotMachinePlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.slot_machine = SlotMachine()
         self.score_manager = ScoreManager()
+
+        self.max_spin_count = int(config["max_spin_count"])
 
     def _spin(self, uid: str) -> str:
         record = self.score_manager.get_record(uid)
@@ -27,8 +30,10 @@ class SlotMachinePlugin(Star):
     async def slot_machine_command(self, event: AstrMessageEvent, spin_count: int = 1):
         """转老虎机，可指定次数"""
         uid = event.get_sender_id()
+        if spin_count > self.max_spin_count:
+            return event.plain_result(f"每次最多只能转{self.max_spin_count}次")
         if spin_count <= 1:
-            return event.plain_result(self._spin(uid))
+            spin_count = 1
 
         results = [self._spin(uid) for _ in range(spin_count)]
         sep = "\n" + "-" * 10 + "\n"
